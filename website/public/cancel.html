@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CancelReady - Processing Cancellation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+  <div class="max-w-md w-full mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div id="loading" class="text-center py-8">
+      <svg class="animate-spin h-10 w-10 text-blue-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <h2 class="text-xl font-semibold text-gray-800 mb-2">Processing Your Cancellation</h2>
+      <p class="text-gray-600">Please wait while we process your request...</p>
+    </div>
+    
+    <div id="success" class="hidden text-center py-8">
+      <div class="bg-green-100 rounded-full p-3 w-16 h-16 flex items-center justify-center mx-auto mb-4">
+        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h2 class="text-xl font-semibold text-gray-800 mb-2">Cancellation Successful</h2>
+      <p class="text-gray-600 mb-6">Your subscription has been successfully canceled.</p>
+      <button id="closeButton" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Close Window</button>
+    </div>
+    
+    <div id="error" class="hidden text-center py-8">
+      <div class="bg-red-100 rounded-full p-3 w-16 h-16 flex items-center justify-center mx-auto mb-4">
+        <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h2 class="text-xl font-semibold text-gray-800 mb-2">Cancellation Failed</h2>
+      <p id="errorMessage" class="text-gray-600 mb-6">We encountered an error while processing your cancellation request.</p>
+      <div class="space-y-3">
+        <button id="retryButton" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full">Try Again</button>
+        <button id="closeErrorButton" class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 w-full">Close Window</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const vendorKey = urlParams.get('vendorKey');
+      const userId = urlParams.get('userId');
+      const subscriptionId = urlParams.get('subscriptionId');
+      const paymentProvider = urlParams.get('paymentProvider') || 'stripe';
+      const email = urlParams.get('email') || '';
+      const reason = urlParams.get('reason') || '';
+      const feedback = urlParams.get('feedback') || '';
+      const testMode = urlParams.get('testMode') === 'true';
+      
+      // Use subscriptionId if available, otherwise fall back to userId
+      const actualUserId = subscriptionId || userId;
+      
+      // Validate required parameters
+      let errorMessages = [];
+      if (!vendorKey) {
+        errorMessages.push('vendorKey');
+      }
+      if (!actualUserId) {
+        errorMessages.push('subscriptionId/userId');
+      }
+
+      if (errorMessages.length > 0) {
+        showError(`Missing required parameter(s): ${errorMessages.join(' and ')} are required.`);
+        return;
+      }
+      
+      // Set up UI event handlers
+      document.getElementById('closeButton').addEventListener('click', function() {
+        window.close();
+      });
+      
+      document.getElementById('closeErrorButton').addEventListener('click', function() {
+        window.close();
+      });
+      
+      document.getElementById('retryButton').addEventListener('click', function() {
+        // Reset UI
+        document.getElementById('loading').classList.remove('hidden');
+        document.getElementById('error').classList.add('hidden');
+        
+        // Retry the cancellation
+        processCancellation();
+      });
+      
+      // Process the cancellation
+      processCancellation();
+      
+      function processCancellation() {
+        // Prepare request data
+        const requestData = {
+          vendorKey: vendorKey,
+          userId: actualUserId,
+          email: email,
+          reason: reason,
+          feedback: feedback,
+          payment_processor: paymentProvider // Using payment_processor to match the Firebase function
+        };
+        
+        // Log request details (for debugging)
+        console.log('Cancellation request:', requestData);
+        
+        // If test mode is enabled, simulate a successful cancellation
+        if (testMode) {
+          console.log('Test mode enabled, simulating successful cancellation');
+          setTimeout(function() {
+            showSuccess();
+          }, 1500);
+          return;
+        }
+        
+        // Send cancellation request to the Firebase function
+        fetch('https://us-central1-cancelready-a49e7.cloudfunctions.net/cancelHandler', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        })
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(data => {
+              throw new Error(data.error || 'Failed to process cancellation');
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Cancellation successful:', data);
+          showSuccess();
+        })
+        .catch(error => {
+          console.error('Cancellation error:', error);
+          showError(error.message || 'An unexpected error occurred');
+        });
+      }
+      
+      function showSuccess() {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('success').classList.remove('hidden');
+      }
+      
+      function showError(message) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('error').classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

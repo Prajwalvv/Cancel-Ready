@@ -1,0 +1,19 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "cancels",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "vendorkey",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "time",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

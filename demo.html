@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CancelReady Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+        <h1 class="text-2xl font-bold mb-6 text-center">Subscription Management</h1>
+        
+        <div class="border-t border-b py-4 my-4">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <h2 class="font-semibold">Premium Plan</h2>
+                    <p class="text-sm text-gray-600">$9.99/month</p>
+                </div>
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Active</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Next billing date: June 25, 2025</p>
+            
+            <!-- CancelReady Target Div -->
+            <div id="cr-target" class="mt-4"></div>
+        </div>
+        
+        <div class="mt-6 text-sm text-gray-500">
+            <p>Need help? <a href="#" class="text-blue-500 hover:underline">Contact support</a></p>
+        </div>
+    </div>
+
+    <!-- Include CancelReady -->
+    <script src="cancelkit.min.js"></script>
+    <script>
+        // Initialize CancelReady with your configuration
+        CancelReady.init({
+            vendorKey: 'demo_vendor_123',
+            userId: 'user_456',
+            buttonText: 'Cancel subscription'
+        });
+    </script>
+</body>
+</html>

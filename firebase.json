@@ -1,0 +1,51 @@
+{
+  "hosting": {
+    "site": "cancelready",
+    "public": "website/out",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "/cancelkit.min.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=3600"
+          },
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
+          }
+        ]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "function": "api"
+      },
+      {
+        "source": "/cancel",
+        "destination": "/cancel.html"
+      },
+      {
+        "source": "/cancel/**",
+        "destination": "/cancel.html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "functions": {
+    "source": "functions"
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

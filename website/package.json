@@ -1,0 +1,31 @@
+{
+  "name": "cancelready-website",
+  "version": "1.0.0",
+  "description": "CancelReady Marketing Website",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && cp ../cancelkit.min.js ./out/",
+    "export": "next build && cp ../cancelkit.min.js ./out/",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.2.0",
+    "autoprefixer": "^10.4.21",
+    "date-fns": "^4.1.0",
+    "firebase": "^10.8.0",
+    "firebase-admin": "^11.11.1",
+    "next": "^14.0.0",
+    "postcss": "^8.5.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.10.1",
+    "tailwindcss": "^3.4.17"
+  },
+  "devDependencies": {
+    "eslint": "^8.52.0",
+    "eslint-config-next": "^14.0.0"
+  }
+}
